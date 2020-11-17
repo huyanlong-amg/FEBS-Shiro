@@ -6,7 +6,6 @@ import cc.mrbird.febs.monitor.service.ISessionService;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,7 +29,7 @@ public class SessionController {
     @RequiresPermissions("online:view")
     public FebsResponse list(String username) {
         List<ActiveUser> list = sessionService.list(username);
-        Map<String, Object> data = new HashMap<>();
+        Map<String, Object> data = new HashMap<>(2);
         data.put("rows", list);
         data.put("total", CollectionUtils.size(list));
         return new FebsResponse().success().data(data);

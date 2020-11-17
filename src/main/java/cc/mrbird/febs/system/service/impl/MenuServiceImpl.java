@@ -65,7 +65,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements IM
         if (StringUtils.isNotBlank(menu.getMenuName())) {
             queryWrapper.lambda().like(Menu::getMenuName, menu.getMenuName());
         }
-        queryWrapper.lambda().orderByAsc(Menu::getMenuId).orderByAsc(Menu::getOrderNum);
+        queryWrapper.lambda().orderByAsc(Menu::getMenuId);
         return this.baseMapper.selectList(queryWrapper);
     }
 
@@ -90,7 +90,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements IM
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void deleteMeuns(String menuIds) {
+    public void deleteMenus(String menuIds) {
         String[] menuIdsArray = menuIds.split(StringPool.COMMA);
         this.delete(Arrays.asList(menuIdsArray));
 

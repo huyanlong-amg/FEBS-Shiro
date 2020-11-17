@@ -15,6 +15,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -41,12 +42,12 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(value = FebsException.class)
     public FebsResponse handleFebsException(FebsException e) {
-        log.error("系统错误", e);
+        log.debug("系统错误", e);
         return new FebsResponse().code(HttpStatus.INTERNAL_SERVER_ERROR).message(e.getMessage());
     }
 
     /**
-     * 统一处理请求参数校验(实体对象传参)
+     * 统一处理请求参数校验(实体对象传参-form)
      *
      * @param e BindException
      * @return FebsResponse
@@ -81,6 +82,23 @@ public class GlobalExceptionHandler {
         return new FebsResponse().code(HttpStatus.BAD_REQUEST).message(message.toString());
     }
 
+    /**
+     * 统一处理请求参数校验(json)
+     *
+     * @param e ConstraintViolationException
+     * @return FebsResponse
+     */
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public FebsResponse handlerMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+        StringBuilder message = new StringBuilder();
+        for (FieldError error : e.getBindingResult().getFieldErrors()) {
+            message.append(error.getField()).append(error.getDefaultMessage()).append(",");
+        }
+        message = new StringBuilder(message.substring(0, message.length() - 1));
+        log.error(message.toString(), e);
+        return new FebsResponse().code(HttpStatus.BAD_REQUEST).message(message.toString());
+    }
+
     @ExceptionHandler(value = LimitAccessException.class)
     public FebsResponse handleLimitAccessException(LimitAccessException e) {
         log.error("LimitAccessException", e);
@@ -89,19 +107,19 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(value = UnauthorizedException.class)
     public FebsResponse handleUnauthorizedException(UnauthorizedException e) {
-        log.error("UnauthorizedException", e);
+        log.error("UnauthorizedException, {}", e.getMessage());
         return new FebsResponse().code(HttpStatus.FORBIDDEN).message(e.getMessage());
     }
 
     @ExceptionHandler(value = AuthenticationException.class)
     public FebsResponse handleAuthenticationException(AuthenticationException e) {
-        log.error("AuthenticationException", e);
+        log.error("AuthenticationException, {}", e.getMessage());
         return new FebsResponse().code(HttpStatus.INTERNAL_SERVER_ERROR).message(e.getMessage());
     }
 
     @ExceptionHandler(value = AuthorizationException.class)
     public FebsResponse handleAuthorizationException(AuthorizationException e){
-        log.error("AuthorizationException", e);
+        log.error("AuthorizationException, {}", e.getMessage());
         return new FebsResponse().code(HttpStatus.UNAUTHORIZED).message(e.getMessage());
     }
 

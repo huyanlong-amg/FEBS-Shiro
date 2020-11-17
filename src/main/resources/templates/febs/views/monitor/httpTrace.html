@@ -26,10 +26,10 @@
                                 </div>
                             </div>
                             <div class="layui-col-md1 table-action-area">
-                                <div class="layui-btn layui-btn-sm layui-btn-primary table-action" id="query">
+                                <div class="layui-btn layui-btn-sm layui-btn-primary febs-button-blue-plain  table-action" id="query">
                                     <i class="layui-icon">&#xe848;</i>
                                 </div>
-                                <div class="layui-btn layui-btn-sm layui-btn-primary table-action" id="reset">
+                                <div class="layui-btn layui-btn-sm layui-btn-primary febs-button-green-plain  table-action" id="reset">
                                     <i class="layui-icon">&#xe79b;</i>
                                 </div>
                             </div>
@@ -99,12 +99,12 @@
         initTable();
 
         $query.on('click', function () {
-            tableIns.reload({where: getQueryParams(), page: {curr: 1}});
+            tableIns.reload({where: getQueryParams()});
         });
 
         $reset.on('click', function () {
             $searchForm[0].reset();
-            tableIns.reload({where: getQueryParams(), page: {curr: 1}});
+            tableIns.reload({where: getQueryParams()});
         });
 
         function initTable() {
@@ -127,11 +127,9 @@
         }
 
         function getQueryParams() {
-            return {
-                method: $searchForm.find('select[name="method"]').val(),
-                url: $searchForm.find('input[name="url"]').val().trim(),
-                invalidate_ie_cache: new Date()
-            };
+            var params = $searchForm.serializeJson();
+            params.invalidate_ie_cache = new Date();
+            return params;
         }
     });
 </script>

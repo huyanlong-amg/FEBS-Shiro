@@ -28,7 +28,9 @@ CREATE TABLE `t_dept`  (
                            `ORDER_NUM` bigint(20) NULL DEFAULT NULL COMMENT '排序',
                            `CREATE_TIME` datetime(0) NULL DEFAULT NULL COMMENT '创建时间',
                            `MODIFY_TIME` datetime(0) NULL DEFAULT NULL COMMENT '修改时间',
-                           PRIMARY KEY (`DEPT_ID`) USING BTREE
+                           PRIMARY KEY (`DEPT_ID`) USING BTREE,
+                           KEY `t_dept_parent_id` (`PARENT_ID`),
+                           KEY `t_dept_dept_name` (`DEPT_NAME`)
 ) ENGINE = InnoDB AUTO_INCREMENT = 11 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '部门表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
@@ -54,7 +56,7 @@ CREATE TABLE `t_eximport`  (
                                `FIELD2` int(11) NOT NULL COMMENT '字段2',
                                `FIELD3` varchar(100) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '字段3',
                                `CREATE_TIME` datetime(0) NOT NULL
-) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = 'Excel导入导出测试' ROW_FORMAT = Dynamic;
+) ENGINE = MyISAM CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = 'Excel导入导出测试' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of t_eximport
@@ -117,8 +119,10 @@ CREATE TABLE `t_job`  (
                           `STATUS` char(2) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '任务状态  0：正常  1：暂停',
                           `REMARK` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '备注',
                           `CREATE_TIME` datetime(0) NULL DEFAULT NULL COMMENT '创建时间',
-                          PRIMARY KEY (`JOB_ID`) USING BTREE
+                          PRIMARY KEY (`JOB_ID`) USING BTREE,
+                          KEY `t_job_create_time` (`CREATE_TIME`)
 ) ENGINE = InnoDB AUTO_INCREMENT = 12 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '定时任务表' ROW_FORMAT = Dynamic;
+
 
 -- ----------------------------
 -- Records of t_job
@@ -142,8 +146,10 @@ CREATE TABLE `t_job_log`  (
                               `ERROR` text CHARACTER SET utf8 COLLATE utf8_general_ci NULL COMMENT '失败信息',
                               `TIMES` decimal(11, 0) NULL DEFAULT NULL COMMENT '耗时(单位：毫秒)',
                               `CREATE_TIME` datetime(0) NULL DEFAULT NULL COMMENT '创建时间',
-                              PRIMARY KEY (`LOG_ID`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 2562 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '调度日志表' ROW_FORMAT = Dynamic;
+                              PRIMARY KEY (`LOG_ID`) USING BTREE,
+                              KEY `t_job_log_create_time` (`CREATE_TIME`)
+) ENGINE = MyISAM AUTO_INCREMENT = 2562 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '调度日志表' ROW_FORMAT = Dynamic;
+
 
 -- ----------------------------
 -- Table structure for t_log
@@ -159,8 +165,9 @@ CREATE TABLE `t_log`  (
                           `IP` varchar(64) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '操作者IP',
                           `CREATE_TIME` datetime(0) NULL DEFAULT NULL COMMENT '创建时间',
                           `location` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '操作地点',
-                          PRIMARY KEY (`ID`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1011 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '操作日志表' ROW_FORMAT = Dynamic;
+                          PRIMARY KEY (`ID`) USING BTREE,
+                          KEY `t_log_create_time` (`CREATE_TIME`)
+) ENGINE = MyISAM AUTO_INCREMENT = 1011 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '操作日志表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for t_login_log
@@ -174,30 +181,35 @@ CREATE TABLE `t_login_log`  (
                                 `IP` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT 'IP地址',
                                 `SYSTEM` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '操作系统',
                                 `BROWSER` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '浏览器',
-                                PRIMARY KEY (`ID`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 70 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '登录日志表' ROW_FORMAT = Dynamic;
+                                PRIMARY KEY (`ID`) USING BTREE,
+                                KEY `t_login_log_login_time` (`LOGIN_TIME`)
+) ENGINE = MyISAM AUTO_INCREMENT = 70 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '登录日志表' ROW_FORMAT = Dynamic;
+
 
 -- ----------------------------
 -- Table structure for t_menu
 -- ----------------------------
 DROP TABLE IF EXISTS `t_menu`;
-CREATE TABLE `t_menu`  (
-                           `MENU_ID` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '菜单/按钮ID',
-                           `PARENT_ID` bigint(20) NOT NULL COMMENT '上级菜单ID',
-                           `MENU_NAME` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '菜单/按钮名称',
-                           `URL` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '菜单URL',
-                           `PERMS` text CHARACTER SET utf8 COLLATE utf8_general_ci NULL COMMENT '权限标识',
-                           `ICON` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '图标',
-                           `TYPE` char(2) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '类型 0菜单 1按钮',
-                           `ORDER_NUM` bigint(20) NULL DEFAULT NULL COMMENT '排序',
-                           `CREATE_TIME` datetime(0) NOT NULL COMMENT '创建时间',
-                           `MODIFY_TIME` datetime(0) NULL DEFAULT NULL COMMENT '修改时间',
-                           PRIMARY KEY (`MENU_ID`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 178 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '菜单表' ROW_FORMAT = Dynamic;
+CREATE TABLE `t_menu` (
+    `MENU_ID` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '菜单/按钮ID',
+    `PARENT_ID` bigint(20) NOT NULL COMMENT '上级菜单ID',
+    `MENU_NAME` varchar(50) NOT NULL COMMENT '菜单/按钮名称',
+    `URL` varchar(50) DEFAULT NULL COMMENT '菜单URL',
+    `PERMS` text COMMENT '权限标识',
+    `ICON` varchar(50) DEFAULT NULL COMMENT '图标',
+    `TYPE` char(2) NOT NULL COMMENT '类型 0菜单 1按钮',
+    `ORDER_NUM` bigint(20) DEFAULT NULL COMMENT '排序',
+    `CREATE_TIME` datetime NOT NULL COMMENT '创建时间',
+    `MODIFY_TIME` datetime DEFAULT NULL COMMENT '修改时间',
+    PRIMARY KEY (`MENU_ID`) USING BTREE,
+    KEY `t_menu_parent_id` (`PARENT_ID`),
+    KEY `t_menu_menu_id` (`MENU_ID`)
+    ) ENGINE=InnoDB AUTO_INCREMENT=179 DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='菜单表';
 
 -- ----------------------------
 -- Records of t_menu
 -- ----------------------------
+BEGIN;
 INSERT INTO `t_menu` VALUES (1, 0, '系统管理', NULL, NULL, 'layui-icon-setting', '0', 1, '2017-12-27 16:39:07', NULL);
 INSERT INTO `t_menu` VALUES (2, 0, '系统监控', '', '', 'layui-icon-alert', '0', 2, '2017-12-27 16:45:51', '2019-06-13 11:20:40');
 INSERT INTO `t_menu` VALUES (3, 1, '用户管理', '/system/user', 'user:view', '', '0', 1, '2017-12-27 16:47:13', '2019-12-04 16:46:50');
@@ -270,6 +282,8 @@ INSERT INTO `t_menu` VALUES (172, 136, '导出Excel', NULL, 'loginlog:export', N
 INSERT INTO `t_menu` VALUES (173, 102, '导出Excel', NULL, 'job:export', NULL, '1', NULL, '2019-06-13 14:37:25', NULL);
 INSERT INTO `t_menu` VALUES (174, 109, '导出Excel', NULL, 'job:log:export', NULL, '1', NULL, '2019-06-13 14:37:46', '2019-06-13 14:38:02');
 INSERT INTO `t_menu` VALUES (175, 2, 'Swagger文档', '/monitor/swagger', 'swagger:view', '', '0', 8, '2019-08-18 17:25:36', '2019-08-18 17:25:59');
+INSERT INTO `t_menu` VALUES (178, 115, '数据权限', '/others/datapermission', 'others:datapermission', '', '0', 5, '2020-04-29 09:34:25', NULL);
+COMMIT;
 
 -- ----------------------------
 -- Table structure for t_role
@@ -298,14 +312,17 @@ INSERT INTO `t_role` VALUES (80, '开发人员', '拥有代码生成模块的权
 -- Table structure for t_role_menu
 -- ----------------------------
 DROP TABLE IF EXISTS `t_role_menu`;
-CREATE TABLE `t_role_menu`  (
-                                `ROLE_ID` bigint(20) NOT NULL COMMENT '角色ID',
-                                `MENU_ID` bigint(20) NOT NULL COMMENT '菜单/按钮ID'
-) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '角色菜单关联表' ROW_FORMAT = Dynamic;
+CREATE TABLE `t_role_menu` (
+    `ROLE_ID` bigint(20) NOT NULL COMMENT '角色ID',
+    `MENU_ID` bigint(20) NOT NULL COMMENT '菜单/按钮ID',
+    KEY `t_role_menu_menu_id` (`MENU_ID`),
+    KEY `t_role_menu_role_id` (`ROLE_ID`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='角色菜单关联表';
 
 -- ----------------------------
 -- Records of t_role_menu
 -- ----------------------------
+BEGIN;
 INSERT INTO `t_role_menu` VALUES (77, 2);
 INSERT INTO `t_role_menu` VALUES (78, 2);
 INSERT INTO `t_role_menu` VALUES (78, 8);
@@ -409,6 +426,7 @@ INSERT INTO `t_role_menu` VALUES (1, 125);
 INSERT INTO `t_role_menu` VALUES (1, 167);
 INSERT INTO `t_role_menu` VALUES (1, 168);
 INSERT INTO `t_role_menu` VALUES (1, 169);
+INSERT INTO `t_role_menu` VALUES (1, 178);
 INSERT INTO `t_role_menu` VALUES (2, 1);
 INSERT INTO `t_role_menu` VALUES (2, 3);
 INSERT INTO `t_role_menu` VALUES (2, 161);
@@ -459,7 +477,8 @@ INSERT INTO `t_role_menu` VALUES (2, 125);
 INSERT INTO `t_role_menu` VALUES (2, 167);
 INSERT INTO `t_role_menu` VALUES (2, 168);
 INSERT INTO `t_role_menu` VALUES (2, 169);
-
+INSERT INTO `t_role_menu` VALUES (2, 178);
+COMMIT;
 -- ----------------------------
 -- Table structure for t_user
 -- ----------------------------
@@ -480,7 +499,9 @@ CREATE TABLE `t_user`  (
                            `THEME` varchar(10) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '主题',
                            `AVATAR` varchar(100) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '头像',
                            `DESCRIPTION` varchar(100) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '描述',
-                           PRIMARY KEY (`USER_ID`) USING BTREE
+                           PRIMARY KEY (`USER_ID`) USING BTREE,
+                           KEY `t_user_username` (`USERNAME`),
+                           KEY `t_user_mobile` (`MOBILE`)
 ) ENGINE = InnoDB AUTO_INCREMENT = 8 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '用户表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
@@ -500,7 +521,9 @@ INSERT INTO `t_user` VALUES (7, 'Margot', '31379841b9f4bfde22b8b40471e9a6ce', 9,
 DROP TABLE IF EXISTS `t_user_role`;
 CREATE TABLE `t_user_role`  (
                                 `USER_ID` bigint(20) NOT NULL COMMENT '用户ID',
-                                `ROLE_ID` bigint(20) NOT NULL COMMENT '角色ID'
+                                `ROLE_ID` bigint(20) NOT NULL COMMENT '角色ID',
+                                KEY `t_user_role_user_id` (`USER_ID`),
+                                KEY `t_user_role_role_id` (`ROLE_ID`)
 ) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '用户角色关联表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
@@ -516,4 +539,83 @@ INSERT INTO `t_user_role` VALUES (7, 78);
 INSERT INTO `t_user_role` VALUES (7, 79);
 INSERT INTO `t_user_role` VALUES (7, 80);
 
+-- ----------------------------
+-- Table structure for t_user_data_permission
+-- ----------------------------
+DROP TABLE IF EXISTS `t_user_data_permission`;
+CREATE TABLE `t_user_data_permission`
+(
+    `USER_ID` bigint(20) NOT NULL,
+    `DEPT_ID` bigint(20) NOT NULL,
+    PRIMARY KEY (`USER_ID`, `DEPT_ID`)
+    ) ENGINE = InnoDB
+    DEFAULT CHARSET = utf8 COMMENT ='用户数据权限关联表';
+
+-- ----------------------------
+-- Records of t_user_data_permission
+-- ----------------------------
+BEGIN;
+INSERT INTO `t_user_data_permission`
+VALUES (1, 1);
+INSERT INTO `t_user_data_permission`
+VALUES (1, 2);
+INSERT INTO `t_user_data_permission`
+VALUES (1, 3);
+INSERT INTO `t_user_data_permission`
+VALUES (1, 4);
+INSERT INTO `t_user_data_permission`
+VALUES (1, 5);
+INSERT INTO `t_user_data_permission`
+VALUES (1, 6);
+INSERT INTO `t_user_data_permission`
+VALUES (2, 1);
+INSERT INTO `t_user_data_permission`
+VALUES (2, 2);
+INSERT INTO `t_user_data_permission`
+VALUES (3, 4);
+INSERT INTO `t_user_data_permission`
+VALUES (4, 5);
+COMMIT;
+
+-- ----------------------------
+-- Table structure for t_data_permission_test
+-- ----------------------------
+DROP TABLE IF EXISTS `t_data_permission_test`;
+CREATE TABLE `t_data_permission_test`
+(
+    `FIELD1`      varchar(20) NOT NULL,
+    `FIELD2`      varchar(20) NOT NULL,
+    `FIELD3`      varchar(20) NOT NULL,
+    `FIELD4`      varchar(20) NOT NULL,
+    `DEPT_ID`     int(11)     NOT NULL,
+    `CREATE_TIME` datetime    NOT NULL,
+    `ID`          int(11)     NOT NULL,
+    PRIMARY KEY (`ID`)
+    ) ENGINE = InnoDB
+DEFAULT CHARSET = utf8 COMMENT ='用户权限测试';
+
+-- ----------------------------
+-- Records of t_data_permission_test
+-- ----------------------------
+BEGIN;
+INSERT INTO `t_data_permission_test`
+VALUES ('小米', '小米10Pro', '4999', '珍珠白', 1, '2020-04-14 15:00:38', 1);
+INSERT INTO `t_data_permission_test`
+VALUES ('腾讯', '黑鲨游戏手机3', '3799', '铠甲灰', 2, '2020-04-14 15:01:36', 2);
+INSERT INTO `t_data_permission_test`
+VALUES ('华为', '华为P30', '3299', '天空之境', 1, '2020-04-14 15:03:11', 3);
+INSERT INTO `t_data_permission_test`
+VALUES ('华为', '华为P40Pro', '6488', '亮黑色', 3, '2020-04-14 15:04:31', 4);
+INSERT INTO `t_data_permission_test`
+VALUES ('vivo', 'Vivo iQOO 3', '3998', '拉力橙', 4, '2020-04-14 15:05:55', 5);
+INSERT INTO `t_data_permission_test`
+VALUES ('一加', '一加7T', '3199', '冰际蓝', 5, '2020-04-14 15:06:53', 6);
+INSERT INTO `t_data_permission_test`
+VALUES ('三星', '三星Galaxy S10', '4098', '浩玉白', 6, '2020-04-14 15:08:25', 7);
+INSERT INTO `t_data_permission_test`
+VALUES ('苹果', 'iPhone 11 pro max', '9198', '暗夜绿', 4, '2020-04-14 15:09:20', 8);
+COMMIT;
+
+
 SET FOREIGN_KEY_CHECKS = 1;
+
